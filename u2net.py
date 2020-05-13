@@ -18,16 +18,28 @@ from PIL import Image
 from data_loader import RescaleT
 from data_loader import ToTensorLab
 
-from model import U2NET  # full size version 173.6 MB
-# from model import U2NETP # small version u2net 4.7 MB
+# small version u2net 4.7 MB (U2NET)
+# full size version 173.6 MB (U2NETP)
+from model import U2NET, U2NETP
 
-model_dir = './U-2-Net/saved_models/u2net/u2net.pth'
+# model_size = "small"
+model_size = "large"
+
+if model_size == "small":
+    model_dir = './U-2-Net/saved_models/u2netp/u2netp.pth'
+    net = U2NETP(3, 1)
+else:
+    model_dir = './U-2-Net/saved_models/u2net/u2net.pth'
+    net = U2NET(3, 1)
 
 print("Loading U-2-Net...")
-net = U2NET(3, 1)
-net.load_state_dict(torch.load(model_dir))
+
 if torch.cuda.is_available():
+    net.load_state_dict(torch.load(model_dir))
     net.cuda()
+else:
+    net.load_state_dict(torch.load(model_dir, map_location={'cuda:0': 'cpu'}))
+
 net.eval()
 
 
